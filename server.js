@@ -5,9 +5,13 @@
  * Exposes health, version, and help endpoints as HTTP API
  * to validate containerized deployment on OpenShift.
  */
-const http = require("node:http");
-const { execSync, spawn } = require("node:child_process");
-const path = require("node:path");
+import http from "node:http";
+import { execSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const PORT = parseInt(process.env.PORT || "8080", 10);
 const OMK_BIN = path.join(__dirname, "packages", "coding-agent", "dist", "cli.js");
