@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omk
+  namespace: poc-oh-my-kimi
+  labels:
+    app: omk
+    autopoc.io/project: oh-my-kimi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: omk
+  template:
+    metadata:
+      labels:
+        app: omk
+    spec:
+      containers:
+        - name: omk
+          image: quay.io/aicatalyst/oh-my-kimi-omk:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: NODE_ENV
+              value: "production"
+            - name: NO_COLOR
+              value: "1"
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
