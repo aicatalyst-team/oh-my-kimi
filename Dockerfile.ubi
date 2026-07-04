@@ -5,22 +5,24 @@ WORKDIR /opt/app-root/src
 # Install system dependencies needed by OMK
 USER 0
 RUN dnf install -y git && dnf clean all
-USER 1001
 
 # Copy package files for dependency installation (layer caching)
-COPY package.json package-lock.json ./
-COPY packages/tui/package.json packages/tui/
-COPY packages/ai/package.json packages/ai/
-COPY packages/agent/package.json packages/agent/
-COPY packages/coding-agent/package.json packages/coding-agent/
-COPY packages/adaptorch-wpl/package.json packages/adaptorch-wpl/
+# Use --chown to ensure the files and dirs are owned by the app user
+COPY --chown=1001:0 package.json package-lock.json ./
+COPY --chown=1001:0 packages/tui/package.json packages/tui/
+COPY --chown=1001:0 packages/ai/package.json packages/ai/
+COPY --chown=1001:0 packages/agent/package.json packages/agent/
+COPY --chown=1001:0 packages/coding-agent/package.json packages/coding-agent/
+COPY --chown=1001:0 packages/adaptorch-wpl/package.json packages/adaptorch-wpl/
+
+USER 1001
 
 # Install dependencies
 RUN npm install --ignore-scripts 2>&1 || \
     (echo "Retrying with --legacy-peer-deps..." && npm install --ignore-scripts --legacy-peer-deps)
 
 # Copy source code
-COPY . .
+COPY --chown=1001:0 . .
 
 # Build the monorepo in order
 RUN cd packages/tui && npx tsc -p tsconfig.build.json 2>&1 || npx tsc -p tsconfig.json 2>&1 || true
